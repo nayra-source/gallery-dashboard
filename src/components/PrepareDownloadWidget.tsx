@@ -14,7 +14,7 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
 
   const [status, setStatus] = useState<'idle' | 'preparing' | 'ready' | 'error'>('idle');
   const [transferId, setTransferId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handlePrepare = async () => {
     setStatus('preparing');
@@ -69,7 +69,6 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
     const fileName = item.displayName || 'download';
 
     // DownloadURL DataTransfer format for OS desktop/file manager direct drag drop
-    // Format: "mimeType:filename:url"
     const downloadUrlHeader = `${mimeType}:${fileName}:${downloadUrl}`;
     e.dataTransfer.setData('DownloadURL', downloadUrlHeader);
     e.dataTransfer.setData('text/uri-list', downloadUrl);
@@ -99,9 +98,9 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
     return (
       <button
         onClick={handlePrepare}
-        className="w-full py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 transition-colors flex items-center justify-center space-x-1.5"
+        className="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/90 dark:hover:bg-slate-700/90 text-slate-800 dark:text-slate-200 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700/80 transition-all flex items-center justify-center space-x-1.5 active:scale-98 group shadow-sm"
       >
-        <Download className="w-3.5 h-3.5 text-indigo-400" />
+        <Download className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 group-hover:translate-y-0.5 transition-transform" />
         <span>Prepare Download</span>
       </button>
     );
@@ -109,8 +108,8 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
 
   if (status === 'preparing') {
     return (
-      <div className="w-full py-2 px-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium rounded-xl flex items-center justify-center space-x-2">
-        <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+      <div className="w-full py-2 px-3 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-xl flex items-center justify-center space-x-2 animate-pulse">
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
         <span>Staging file on device...</span>
       </div>
     );
@@ -120,7 +119,7 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
     return (
       <button
         onClick={handlePrepare}
-        className="w-full py-2 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium rounded-xl transition-colors flex items-center justify-center space-x-1.5"
+        className="w-full py-2 px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-xs font-semibold rounded-xl transition-colors flex items-center justify-center space-x-1.5 active:scale-98"
       >
         <FileDown className="w-3.5 h-3.5" />
         <span>Retry Prepare</span>
@@ -130,25 +129,25 @@ export const PrepareDownloadWidget: React.FC<PrepareDownloadWidgetProps> = ({ de
 
   // Ready state: Draggable element + Direct Save button
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 animate-fade-in">
       <div
         draggable="true"
         onDragStart={handleDragStart}
-        className="w-full py-2.5 px-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 rounded-xl text-xs font-semibold cursor-grab active:cursor-grabbing transition-all flex items-center justify-between shadow-md shadow-emerald-950/20"
+        className="w-full py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs font-bold cursor-grab active:cursor-grabbing transition-all flex items-center justify-between shadow-sm active:scale-98"
         title="Drag onto your OS desktop or file explorer to copy directly!"
       >
         <div className="flex items-center space-x-2 truncate">
-          <Grip className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <Grip className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           <span className="truncate">Drag file to Desktop</span>
         </div>
-        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 ml-1" />
+        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 ml-1" />
       </div>
 
       <button
         onClick={handleDirectDownload}
-        className="w-full py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium rounded-lg border border-slate-700 transition-colors flex items-center justify-center space-x-1"
+        className="w-full py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-semibold rounded-lg border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-center space-x-1 active:scale-98 shadow-sm"
       >
-        <Download className="w-3 h-3 text-slate-400" />
+        <Download className="w-3 h-3 text-slate-500 dark:text-slate-400" />
         <span>Or click to Save file</span>
       </button>
     </div>

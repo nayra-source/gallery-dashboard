@@ -25,6 +25,10 @@ function setCachedThumbnail(key: string, url: string) {
   thumbnailCache.set(key, url);
 }
 
+export function getCachedThumbnailUrl(deviceId: string, mediaId: number): string | null {
+  return thumbnailCache.get(`${deviceId}_${mediaId}`) || null;
+}
+
 export const ThumbnailImage: React.FC<ThumbnailImageProps> = ({ deviceId, item, onClick }) => {
   const cacheKey = `${deviceId}_${item.mediaId}`;
 
@@ -107,28 +111,29 @@ export const ThumbnailImage: React.FC<ThumbnailImageProps> = ({ deviceId, item, 
     <div
       ref={containerRef}
       onClick={onClick}
-      className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden cursor-pointer group flex items-center justify-center border border-slate-800 hover:border-indigo-500/50 transition-all duration-200"
+      className="relative w-full h-full bg-slate-900 rounded-xl overflow-hidden cursor-pointer group flex items-center justify-center border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 shadow-inner"
     >
       {src ? (
         <img
           src={src}
           alt={item.displayName}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 animate-fade-in"
         />
       ) : isLoading ? (
-        <div className="flex flex-col items-center justify-center space-y-2 text-slate-500 p-2">
-          <span className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-[10px]">Loading...</span>
+        <div className="w-full h-full skeleton flex flex-col items-center justify-center space-y-2 text-slate-400 p-2">
+          <span className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-[10px] font-mono tracking-wider text-slate-400">Loading...</span>
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center space-y-1 text-slate-500 p-2 text-center">
+        <div className="flex flex-col items-center justify-center space-y-1.5 text-slate-500 p-2 text-center">
           <AlertCircle className="w-5 h-5 text-amber-500/80" />
+          <span className="text-[10px] text-slate-400">Preview unavailable</span>
           <button
             onClick={(e) => {
               e.stopPropagation();
               loadThumbnail();
             }}
-            className="text-[10px] text-indigo-400 hover:underline flex items-center space-x-1 mt-1"
+            className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center space-x-1 mt-1 font-medium"
           >
             <RefreshCw className="w-3 h-3" />
             <span>Retry</span>
@@ -142,8 +147,9 @@ export const ThumbnailImage: React.FC<ThumbnailImageProps> = ({ deviceId, item, 
 
       {/* Media type overlay badge */}
       {isVideo && (
-        <div className="absolute top-2 right-2 p-1 rounded-md bg-black/60 backdrop-blur-sm text-white">
-          <Film className="w-3.5 h-3.5" />
+        <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-slate-950/70 backdrop-blur-md border border-slate-700/60 text-slate-200 text-[10px] font-medium flex items-center space-x-1 shadow-md">
+          <Film className="w-3 h-3 text-teal-400" />
+          <span>VIDEO</span>
         </div>
       )}
     </div>

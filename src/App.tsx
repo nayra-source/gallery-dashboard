@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider, useToast } from './context/ToastContext';
-import { setAuthTokenGetter, setAuthErrorCallback } from './services/api';
+import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Layout } from './components/Layout';
 import { LoginScreen } from './components/LoginScreen';
 import { DeviceListScreen } from './components/DeviceListScreen';
@@ -34,11 +34,13 @@ const MainContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <MainContent />
-      </ToastProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <MainContent />
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

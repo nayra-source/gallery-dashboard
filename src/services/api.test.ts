@@ -44,4 +44,21 @@ describe('API Service', () => {
     await expect(api.getDevices()).rejects.toThrow('Token revoked');
     expect(errorCallback).toHaveBeenCalledTimes(1);
   });
+
+  it('prepareTransfer issues POST request with deviceId and mediaId', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ transferId: 'tid-999', status: 'requested' }),
+    } as Response);
+
+    const res = await api.prepareTransfer('device-abc', 42);
+    expect(res.transferId).toBe('tid-999');
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/transfers/prepare',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ deviceId: 'device-abc', mediaId: 42 }),
+      })
+    );
+  });
 });
