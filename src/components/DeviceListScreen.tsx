@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DeviceSummary } from '../types';
 import { api } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { PairDeviceModal } from './PairDeviceModal';
 import { ConfirmModal } from './ConfirmModal';
 import { SkeletonDeviceCards } from './Skeleton';
 import {
@@ -43,7 +42,6 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
   const [devices, setDevices] = useState<DeviceSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isPairModalOpen, setIsPairModalOpen] = useState(false);
 
   // Search, Filter & View state
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,7 +158,7 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
             <FleetMetricIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Fleet</span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Devices</span>
             <div className="flex items-baseline space-x-2">
               <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">{devices.length}</span>
               <span className="text-[10px] text-slate-500 font-mono">phones</span>
@@ -218,7 +216,7 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
         <div>
           <div className="flex items-center space-x-3">
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-              Paired Fleet
+              Devices
             </h1>
             <span className="px-2.5 py-0.5 text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-full font-mono">
               {filteredDevices.length} Connected
@@ -250,14 +248,6 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
             aria-label="Refresh Device List"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
-          </button>
-
-          <button
-            onClick={() => setIsPairModalOpen(true)}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/25 transition-all flex items-center space-x-2 active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Pair Device</span>
           </button>
         </div>
       </div>
@@ -362,7 +352,7 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
             {searchQuery
               ? `No devices match '${searchQuery}'. Try clearing your search.`
-              : 'Click "Pair Device" to connect your first Android phone.'}
+              : 'Open the Gallery app on your Android device to automatically register and connect.'}
           </p>
           {searchQuery ? (
             <button
@@ -373,11 +363,11 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
             </button>
           ) : (
             <button
-              onClick={() => setIsPairModalOpen(true)}
+              onClick={() => fetchDevices(true)}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all inline-flex items-center space-x-2"
             >
-              <Plus className="w-4 h-4" />
-              <span>Pair Device Now</span>
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh Devices</span>
             </button>
           )}
         </div>
@@ -431,27 +421,24 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
                   </div>
 
                   {/* Status Badge */}
-                  <div
-                    className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border flex-shrink-0 ${
-                      device.isOnline
-                        ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
-                        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    {device.isOnline ? (
-                      <>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse-glow" />
-                        <Wifi className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                        <span>Online</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
-                        <WifiOff className="w-3 h-3 text-slate-500" />
-                        <span>Offline</span>
-                      </>
-                    )}
-                  </div>
+                  {device.isOnline && device.hasMediaPermission === false ? (
+                    <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border flex-shrink-0 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30 shadow-inner">
+                      <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 animate-pulse" />
+                      <span>Permission Revoked</span>
+                    </div>
+                  ) : device.isOnline ? (
+                    <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border flex-shrink-0 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse-glow" />
+                      <Wifi className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <span>Online</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border flex-shrink-0 bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
+                      <WifiOff className="w-3 h-3 text-slate-500" />
+                      <span>Offline</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Status info */}
@@ -556,11 +543,6 @@ export const DeviceListScreen: React.FC<DeviceListScreenProps> = ({ onSelectDevi
       )}
 
       {/* Modals */}
-      <PairDeviceModal
-        isOpen={isPairModalOpen}
-        onClose={() => setIsPairModalOpen(false)}
-        onDevicePaired={() => fetchDevices(false)}
-      />
 
       <ConfirmModal
         isOpen={!!revokeTarget}

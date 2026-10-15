@@ -8,6 +8,8 @@ export interface DeviceSummary {
   name: string | null;
   isOnline: boolean;
   lastSeenAt: string | null;
+  hasMediaPermission?: boolean;
+  permissionState?: 'granted' | 'partially_granted' | 'denied' | 'permanently_denied';
 }
 
 export interface GeneratePairingCodeResponse {

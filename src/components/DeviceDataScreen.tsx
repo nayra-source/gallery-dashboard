@@ -8,11 +8,11 @@ import { MediaCatalogView } from './MediaCatalogView';
 import { MediaViewerModal } from './MediaViewerModal';
 import { RenameModal } from './RenameModal';
 import { ConfirmModal } from './ConfirmModal';
-import { PairDeviceModal } from './PairDeviceModal';
 import {
   ArrowLeft,
   RefreshCw,
   Plus,
+  ShieldAlert,
 } from 'lucide-react';
 import { HardwareDeviceIcon } from './icons';
 
@@ -186,16 +186,15 @@ export const DeviceDataScreen: React.FC<DeviceDataScreenProps> = ({ device, onBa
     setIsDeleting(true);
 
     try {
-      const sendRes = await api.sendCommand(device.id, 'DELETE_MEDIA', {
-        mediaIds: [deleteTarget.mediaId],
-      });
+      await api.executeCommandAndPoll<{ status: string; trashed?: number[] }>(
+        device.id,
+        'DELETE_MEDIA',
+        { mediaIds: [deleteTarget.mediaId] },
+        12000,
+        800
+      );
 
-      if (!sendRes.delivered) {
-        showInfo('Delete Queued', 'Device is offline. Delete command queued.');
-      } else {
-        showSuccess('Delete Requested', 'Confirmation prompt sent to phone for photo/video.');
-      }
-
+      showSuccess('Delete Successful', `'${deleteTarget.displayName}' was deleted from device.`);
       setItems((prev) => prev.filter((i) => i.mediaId !== deleteTarget.mediaId));
       setDeleteTarget(null);
     } catch (err: unknown) {
@@ -214,6 +213,19 @@ export const DeviceDataScreen: React.FC<DeviceDataScreenProps> = ({ device, onBa
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Media Permission Revoked Banner */}
+      {device.hasMediaPermission === false && (
+        <div className="p-4 bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-500/40 rounded-2xl flex items-start space-x-3 text-amber-900 dark:text-amber-200 shadow-lg glow-border-amber">
+          <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5 animate-pulse" />
+          <div className="text-xs">
+            <h4 className="font-bold uppercase tracking-wider font-mono">Media Access Revoked on Device</h4>
+            <p className="mt-0.5 text-amber-800 dark:text-amber-300 leading-relaxed">
+              The device user has disabled photo and video permissions in Android Settings. Media indexing and remote downloads will fail until permissions are re-granted on the phone.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Top Header matching mockup layout in Light & Dark modes */}
       <div className="glass-panel p-5 rounded-2xl border border-slate-200 dark:border-slate-800/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center space-x-3.5">
@@ -266,14 +278,6 @@ export const DeviceDataScreen: React.FC<DeviceDataScreenProps> = ({ device, onBa
             aria-label="Refresh Device Data"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-indigo-600 dark:text-indigo-400' : ''}`} />
-          </button>
-
-          <button
-            onClick={() => setIsPairModalOpen(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-1.5 active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Pair Device</span>
           </button>
         </div>
       </div>
@@ -342,11 +346,6 @@ export const DeviceDataScreen: React.FC<DeviceDataScreenProps> = ({ device, onBa
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}
         onClose={() => setDeleteTarget(null)}
-      />
-
-      <PairDeviceModal
-        isOpen={isPairModalOpen}
-        onClose={() => setIsPairModalOpen(false)}
       />
     </div>
   );

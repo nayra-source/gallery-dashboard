@@ -44,21 +44,19 @@ export const RenameModal: React.FC<RenameModalProps> = ({
 
     setIsLoading(true);
     try {
-      const sendRes = await api.sendCommand(deviceId, 'RENAME_MEDIA', {
-        mediaId: item.mediaId,
-        newName: trimmed,
-      });
+      await api.executeCommandAndPoll(
+        deviceId,
+        'RENAME_MEDIA',
+        { mediaId: item.mediaId, newName: trimmed },
+        12000,
+        800
+      );
 
-      if (!sendRes.delivered) {
-        showInfo('Command Queued', 'Device is offline. Rename will trigger when phone reconnects.');
-      } else {
-        showSuccess('Rename Requested', `Confirmation prompt sent to phone for '${trimmed}'.`);
-      }
-
+      showSuccess('Rename Successful', `Photo/video renamed to '${trimmed}'.`);
       if (onRenamed) onRenamed(item, trimmed);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Rename command failed';
+      const msg = err instanceof Error ? err.message : 'Rename failed';
       showError('Rename Error', msg);
     } finally {
       setIsLoading(false);

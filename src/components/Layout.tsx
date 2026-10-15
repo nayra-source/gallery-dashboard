@@ -30,14 +30,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <BrandLogo size="md" />
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="font-extrabold text-base sm:text-lg tracking-tight leading-none bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-600 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-                  Gallery Hub
+                <h1 className="font-extrabold text-base sm:text-lg tracking-wider leading-none bg-gradient-to-r from-emerald-500 via-cyan-500 to-indigo-500 dark:from-emerald-400 dark:via-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent font-mono">
+                  CYBER COMMAND
                 </h1>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-full font-mono">
-                  ENTERPRISE
+                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-full font-mono tracking-wider">
+                  v2.5 LIVE HUD
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Remote Device Fleet Manager</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono tracking-wide">ZERO-TOUCH DEVICE NODE MANAGER</span>
             </div>
           </div>
 
